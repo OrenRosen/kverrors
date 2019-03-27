@@ -1,5 +1,5 @@
 language: go
-
+go_import_path: github.com/OrenRosen/errors
 go:
   - "1.11"
 
