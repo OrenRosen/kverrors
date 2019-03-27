@@ -1,0 +1,6 @@
+language: go
+notificaitons:
+  email:
+    recipients: oren363@gmail.com
+    on_success: change
+    on_failure: always
