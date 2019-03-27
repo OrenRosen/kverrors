@@ -76,3 +76,6 @@ func TestWrapCustomType(t *testing.T) {
 	require.Equal(t, expectedStack, err3.(stacker).StackTrace())
 
 }
+
+
+// comment
