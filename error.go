@@ -3,18 +3,18 @@ package errors
 import (
 	"fmt"
 
-	"github.com/pkg/errors"
+	pkgerrors "github.com/pkg/errors"
 )
 
 type inner struct {
 	msg        string
 	keyvals    []interface{}
-	stackTrace errors.StackTrace
+	stackTrace pkgerrors.StackTrace
 }
 
 // inner implements error, stacker and keyvaluer
 func (e inner) Error() string                 { return e.msg }
-func (e inner) StackTrace() errors.StackTrace { return e.stackTrace }
+func (e inner) StackTrace() pkgerrors.StackTrace { return e.stackTrace }
 func (e inner) KeyVals() []interface{}        { return e.keyvals }
 
 func New(msg string, keyvals ...interface{}) error {
@@ -65,15 +65,15 @@ type causer interface {
 }
 
 type stacker interface {
-	StackTrace() errors.StackTrace
+	StackTrace() pkgerrors.StackTrace
 }
 
 type keyvaluer interface {
 	KeyVals() []interface{}
 }
 
-func newStackTrace(skip int) errors.StackTrace {
-	pkgErr := errors.New("")
+func newStackTrace(skip int) pkgerrors.StackTrace {
+	pkgErr := pkgerrors.New("")
 	stack := stackTraceFrom(pkgErr)
 	if len(stack) > skip {
 		stack = stack[skip:]
@@ -82,13 +82,13 @@ func newStackTrace(skip int) errors.StackTrace {
 	return stack
 }
 
-func stackTraceFrom(err error) errors.StackTrace {
+func stackTraceFrom(err error) pkgerrors.StackTrace {
 	tracer, ok := Cause(err).(interface {
-		StackTrace() errors.StackTrace
+		StackTrace() pkgerrors.StackTrace
 	})
 
 	if !ok {
-		return errors.StackTrace{}
+		return pkgerrors.StackTrace{}
 	}
 
 	s := tracer.StackTrace()
