@@ -1,4 +1,4 @@
-# errors
+# errors [![Build Status](https://travis-ci.org/OrenRosen/errors.svg?branch=master)](https://travis-ci.org/OrenRosen/errors)
 pkg errors is a wrapping to pkg/errors which adds key value params.
 
 ## Wrapping an error:
