@@ -1,4 +1,4 @@
-module github.com/OrenRose/errors
+module github.com/OrenRosen/errors
 
 require (
 	github.com/pkg/errors v0.8.1
