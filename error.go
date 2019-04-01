@@ -13,9 +13,9 @@ type inner struct {
 }
 
 // inner implements error, stacker and keyvaluer
-func (e inner) Error() string                 { return e.msg }
+func (e inner) Error() string                    { return e.msg }
 func (e inner) StackTrace() pkgerrors.StackTrace { return e.stackTrace }
-func (e inner) KeyVals() []interface{}        { return e.keyvals }
+func (e inner) KeyVals() []interface{}           { return e.keyvals }
 
 func New(msg string, keyvals ...interface{}) error {
 	return &inner{
