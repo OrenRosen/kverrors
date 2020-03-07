@@ -28,7 +28,7 @@ func TestAs(t *testing.T) {
 
 	var myErr2 myError
 	require.True(t, goerrors.As(fmtErr, &myErr2))
-	require.Equal(t, myErr2.Error(), "my error")
+	require.Equal(t, myErr2.Error(), "msy error")
 }
 
 func TestUnwrapAllWithFmt(t *testing.T) {
