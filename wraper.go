@@ -7,27 +7,29 @@ import (
 )
 
 type wraper struct {
-	cause      error
+	wrappedErr error
 	msg        string
 	keyvals    []interface{}
 	stackTrace errors.StackTrace
 }
 
-// inner implements error, stacker, keyvaluer and causer
-func (w *wraper) Error() string                 { return w.msg + ": " + w.cause.Error() }
-func (w *wraper) Cause() error                  { return w.cause }
+// wraper implements error, stacker, keyvaluer and unwrapper
+func (w *wraper) Error() string                 { return w.msg + ": " + w.wrappedErr.Error() }
+func (w *wraper) Unwrap() error                 { return w.wrappedErr }
 func (w *wraper) StackTrace() errors.StackTrace { return w.stackTrace }
 func (w *wraper) KeyVals() []interface{}        { return w.keyvals }
 
-// Wrap Creates a new error with added msg and keyvals
-// It saves the passed error as the cause, so it could trace back to it when logging/reporting
+// Wrap returns a new error with added msg and keyvals.
+// the returned error wraps supplied error.
+// the stacktrace will be either of the deepest error which implement tracer
+// or a new one from this location (by pkg/errors).
 func Wrap(err error, msg string, keyvals ...interface{}) error {
 	if err == nil {
 		return nil
 	}
 
 	return &wraper{
-		cause:      err,
+		wrappedErr: err,
 		msg:        msg,
 		keyvals:    keyvals,
 		stackTrace: getOrNewStackTrace(err),
@@ -43,18 +45,17 @@ func Wrapf(err error, format string, args ...interface{}) error {
 	return Wrap(err, msg)
 }
 
-// WrapAndMerge can wrap your custom error, and merge data from another error.
-// Data means stack trace and keyvals and message
-func WrapAndMerge(cause, err error, keyvals ...interface{}) error {
-	if err == nil {
-		return nil
+// UnwrapAll returns the most inner error.
+// in cases all errors can unwrap, the returned error is the original error.
+func UnwrapAll(err error) error {
+	for err != nil {
+		unw, ok := err.(unwrapper)
+		if !ok {
+			break
+		}
+		err = unw.Unwrap()
 	}
-	return &wraper{
-		cause:      cause,
-		msg:        err.Error(),
-		keyvals:    KeyVals(err, keyvals...),
-		stackTrace: getOrNewStackTrace(err),
-	}
+	return err
 }
 
 // private

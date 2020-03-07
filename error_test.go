@@ -32,8 +32,16 @@ func TestErrorf(t *testing.T) {
 		format   []interface{}
 		expected string
 	}{
-		{"some msg without format", []interface{}{}, "some msg without format"},
-		{"some msg with %d format", []interface{}{1}, "some msg with 1 format"},
+		{
+			msg:      "some msg without format",
+			format:   []interface{}{},
+			expected: "some msg without format",
+		},
+		{
+			msg:      "some msg with %d format",
+			format:   []interface{}{1},
+			expected: "some msg with 1 format",
+		},
 	}
 
 	for _, example := range examples {

@@ -2,6 +2,7 @@ package errors
 
 import (
 	"fmt"
+	"strings"
 
 	pkgerrors "github.com/pkg/errors"
 )
@@ -17,6 +18,10 @@ func (e inner) Error() string                    { return e.msg }
 func (e inner) StackTrace() pkgerrors.StackTrace { return e.stackTrace }
 func (e inner) KeyVals() []interface{}           { return e.keyvals }
 
+// New returns a new error with the provided msg and keyvals.
+// keyvals are structured key-value pairs, and usually used for infrastructure frameworks
+// as logs and error reporting. (should not be analysed in the code, as the message isn't).
+// the returned error holds a stacktrace created with pkg/errors
 func New(msg string, keyvals ...interface{}) error {
 	return &inner{
 		msg:        msg,
@@ -25,30 +30,29 @@ func New(msg string, keyvals ...interface{}) error {
 	}
 }
 
+// New returns a new error with formatted msg.
+// the returned error holds a stacktrace created with pkg/errors
 func Errorf(format string, args ...interface{}) error {
+	if strings.Contains(format, "%w") {
+		err := fmt.Errorf(format, args...)
+		return Wrap(err, "Errorf")
+	}
+
 	msg := fmt.Sprintf(format, args...)
 	return New(msg)
 }
 
-func Cause(err error) error {
-	for err != nil {
-		c, ok := err.(causer)
-		if !ok {
-			break
-		}
-		err = c.Cause()
-	}
-	return err
-}
-
+// KeyVals returns the key value pairs across the error chain
+// the error chain considered to be stopped when the error doesn't
+// unwraps to an inner error.
 func KeyVals(err error, keyvals ...interface{}) []interface{} {
 	for err != nil {
 		if kver, ok := err.(keyvaluer); ok {
 			keyvals = append(kver.KeyVals(), keyvals...)
 		}
 
-		if causer, ok := err.(causer); ok {
-			err = causer.Cause()
+		if unw, ok := err.(unwrapper); ok {
+			err = unw.Unwrap()
 			continue
 		}
 
@@ -60,8 +64,8 @@ func KeyVals(err error, keyvals ...interface{}) []interface{} {
 
 // private
 
-type causer interface {
-	Cause() error
+type unwrapper interface {
+	Unwrap() error
 }
 
 type stacker interface {
@@ -83,7 +87,7 @@ func newStackTrace(skip int) pkgerrors.StackTrace {
 }
 
 func stackTraceFrom(err error) pkgerrors.StackTrace {
-	tracer, ok := Cause(err).(interface {
+	tracer, ok := UnwrapAll(err).(interface {
 		StackTrace() pkgerrors.StackTrace
 	})
 
