@@ -8,12 +8,25 @@ import (
 
 func TestNew(t *testing.T) {
 	examples := []struct {
-		msg string
-		kv  []interface{}
+		msg         string
+		kv          []interface{}
+		expectedMap map[string]interface{}
 	}{
-		{"some msg", []interface{}{"firstKey", "first value"}},
-		{"some msg", []interface{}{"firstKey", "first value", "secondKey", "second value"}},
-		{"some msg", []interface{}{}},
+		{
+			msg:         "some msg",
+			kv:          []interface{}{"firstKey", "first value"},
+			expectedMap: map[string]interface{}{"firstKey": "first value"},
+		},
+		{
+			msg:         "some msg",
+			kv:          []interface{}{"firstKey", "first value", "secondKey", "second value"},
+			expectedMap: map[string]interface{}{"firstKey": "first value", "secondKey": "second value"},
+		},
+		{
+			msg:         "some msg",
+			kv:          []interface{}{""},
+			expectedMap: map[string]interface{}{},
+		},
 	}
 
 	for _, example := range examples {
@@ -22,7 +35,7 @@ func TestNew(t *testing.T) {
 		kver, ok := err.(keyvaluer)
 		require.True(t, ok)
 		require.Equal(t, example.kv, kver.KeyVals())
-		require.Equal(t, example.kv, KeyVals(err))
+		require.Equal(t, example.expectedMap, KeyVals(err))
 	}
 }
 

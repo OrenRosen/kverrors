@@ -11,7 +11,7 @@ From [go-kit/log](https://github.com/go-kit/kit/tree/master/log)
 In short, A structured log message is not only a simple plain text message for a human to read, but a collection of key-values attributes which can be processed and analysed.
 
 Treating errors as structured as well may give us better insight about our errors.
-This package is an experiment for using structured errors for logging as well. Although we may find this is not as useful as in logging general information.
+This package is an experiment for using structured errors for logging as well.
 
 ## Wrapping an error:
 Wrapping an error is done using `Wrap` function:
@@ -21,62 +21,50 @@ func Wrap(err error, msg string, keyvals ...interface{}) error
 For example:
 ```golang
 if err != nil {
-    return errors.Wrap(err, "somePkg.someFunc",
+    return kverrors.Wrap(err, "somePkg.someFunc",
         "someKey", "some value",
     )
 }
 ```
-## Unwrapping an error:
-Like in `pkg/errors`, getting the wrapped error can be done by the `causer` interface, which each error created with this package implements
-```golang
-type causer interface {
-        Cause() error
-}
+
+## KeyVals  
+
+The funciton
+```go
+kverrors.KeyVals(err error) map[string]interface{}
+```
+returns the key value pairs across the error chain. 
+the error chain considered to be stopped when the error doesn't unwraps to an inner error.
+
+## Stack Trace
+
+`kverrors` depends on `pkg/errors` for generating the stack trace.
+For getting the stack trace, the error returned from `Wrap` implements
+```go
+StackTrace() []pkgerrors.StackTrace
 ``` 
-Meaning, calling `pkgerrors.Cause` is supported on errors of this package. For convinience this package implemts `Cause` as well
-```golang
-func Cause(err error) error
+
+## Unwrapping an error
+
+Errors returned in `kverrors` can unwrap to the inner error by implementing
+```go
+Unwrap() error
 ```
 
----
-## Using custom Types:
-Usually the error type which is reported (by 3rd party) is the type of the original error. This may be by supporting `pkg/errors` and retrieving the original error by the `Cause()` function   
+### Unwrap to the original error
 
-Easiest way to do this is for example:
-
-```golang
-package example
-
-type someError string
-func (e someError) Error() string { return string(e) }
-
-const veryBadError = someError("failed desperately")
-
-// inside a function:
-return errors.Wrap(veryBadError, "someFunc")
+Package `kverrors` exports function
+```go
+UnwrapAll()
 ```
-
-This way when reporting, you'll get the type of your error.
-
-### Wrap and Merge error:
-Another way to achieve this is by using `WrapAndMerge` function.\
-```golang
-func WrapAndMerge(cause, err error, keyvals ...interface{}) error
-```
-Let's say you want to report on your custom error, but also you don't want to lose the data for the other error, as it may support `pkg/errors` as well.\
-Using `WrapAndMerge` you can set your custom error as the cause, and merge the data of the other error (message, structured data and stacktrace)
+USing this function you can get the original error in the error chain. This function
+iteratively goes over the error chain using the method `Unwrap`, and returns the first
+error which doesn't implement this interface.
 
 
-```golang
-package example
+## Support of Go 1.13 and pkg/errors
 
-type someError string
-func (e someError) Error() string { return string(e) }
+Implementing `Unwrap` makes it possible to use Go's `errors` package `Is` and `As` method.
 
-const veryBadError = someError("failed desperately")
-
-// inside a function:
-if err != nil {
-    return errors.WrapAndMerge(veryBadError, err)
-}
-```
+Also, the error chain may contain any error which implement `Unwrap`,
+meaning you can use `kverrors.Wrap` together with `pkgerrors.Wrap` and `fmt.Errorf("%w", err)`

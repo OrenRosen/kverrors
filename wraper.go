@@ -49,12 +49,14 @@ func Wrapf(err error, format string, args ...interface{}) error {
 // in cases all errors can unwrap, the returned error is the original error.
 func UnwrapAll(err error) error {
 	for err != nil {
-		unw, ok := err.(unwrapper)
-		if !ok {
-			break
+		if unw, ok := err.(unwrapper); ok {
+			err = unw.Unwrap()
+			continue
 		}
-		err = unw.Unwrap()
+
+		break
 	}
+
 	return err
 }
 
@@ -66,4 +68,8 @@ func getOrNewStackTrace(err error) errors.StackTrace {
 	}
 
 	return newStackTrace(2)
+}
+
+type causer interface {
+	Cause() error
 }

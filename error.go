@@ -45,7 +45,7 @@ func Errorf(format string, args ...interface{}) error {
 // KeyVals returns the key value pairs across the error chain
 // the error chain considered to be stopped when the error doesn't
 // unwraps to an inner error.
-func KeyVals(err error, keyvals ...interface{}) []interface{} {
+func KeyVals(err error, keyvals ...interface{}) map[string]interface{} {
 	for err != nil {
 		if kver, ok := err.(keyvaluer); ok {
 			keyvals = append(kver.KeyVals(), keyvals...)
@@ -59,7 +59,7 @@ func KeyVals(err error, keyvals ...interface{}) []interface{} {
 		err = nil
 	}
 
-	return keyvals
+	return paramsFromKeyvals(keyvals)
 }
 
 // private
@@ -97,4 +97,48 @@ func stackTraceFrom(err error) pkgerrors.StackTrace {
 
 	s := tracer.StackTrace()
 	return s
+}
+
+func paramsFromKeyvals(keyvals []interface{}) map[string]interface{} {
+	extra := make(map[string]interface{}, len(keyvals)/2)
+
+	for i, key := range keyvals {
+		if i%2 != 0 {
+			continue
+		}
+
+		valIndex := i + 1
+		if valIndex >= len(keyvals) {
+			break
+		}
+
+		value := val(keyvals[valIndex])
+		keyStr := keyStr(key)
+		extra[keyStr] = value
+	}
+
+	return extra
+}
+
+func keyStr(key interface{}) string {
+	keyStr, ok := key.(string)
+	if !ok {
+		keyStr = fmt.Sprintf("%v", key)
+	}
+
+	return keyStr
+}
+
+type valueFunc func() interface{}
+
+func val(value interface{}) interface{} {
+	if v, ok := value.(valueFunc); ok {
+		value = v()
+	}
+
+	if value == "" {
+		value = "empty"
+	}
+
+	return value
 }

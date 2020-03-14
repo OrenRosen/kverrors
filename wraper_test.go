@@ -5,6 +5,7 @@ import (
 	"io"
 	"testing"
 
+	pkgerrors "github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 )
 
@@ -14,28 +15,28 @@ func TestWrap(t *testing.T) {
 		msg           string
 		kv            []interface{}
 		expectedError string
-		expectedKV    []interface{}
+		expectedKV    map[string]interface{}
 	}{
 		{
 			err:           New("some msg", "firstKey", "first value"),
 			msg:           "other msg",
 			kv:            []interface{}{"second key", "second value"},
 			expectedError: "other msg: some msg",
-			expectedKV:    []interface{}{"firstKey", "first value", "second key", "second value"},
+			expectedKV:    map[string]interface{}{"firstKey": "first value", "second key": "second value"},
 		},
 		{
 			err:           io.EOF,
 			msg:           "other msg",
 			kv:            []interface{}{"second key", "second value"},
 			expectedError: "other msg: EOF",
-			expectedKV:    []interface{}{"second key", "second value"},
+			expectedKV:    map[string]interface{}{"second key": "second value"},
 		},
 		{
 			err:           Wrap(io.EOF, "other msg", "other key", "other value"),
 			msg:           "another msg",
 			kv:            []interface{}{"second key", "second value"},
 			expectedError: "another msg: other msg: EOF",
-			expectedKV:    []interface{}{"other key", "other value", "second key", "second value"},
+			expectedKV:    map[string]interface{}{"other key": "other value", "second key": "second value"},
 		},
 	}
 
@@ -60,9 +61,9 @@ func TestWrapFmt(t *testing.T) {
 	err = fmt.Errorf("fmt3: %w", err)
 	require.Equal(t, "fmt3: oops2: fmt2: fmt1: oops", err.Error())
 
-	expectedKV := []interface{}{
-		"k1", "v1",
-		"k2", "v2",
+	expectedKV := map[string]interface{}{
+		"k1": "v1",
+		"k2": "v2",
 	}
 	require.Equal(t, expectedKV, KeyVals(err))
 }
@@ -87,7 +88,11 @@ func TestWrapCustomType(t *testing.T) {
 
 	c := UnwrapAll(err)
 	require.Equal(t, myErr, c)
-	expectedKV := append(kv, append(kv2, kv3...)...)
+	expectedKV := map[string]interface{}{
+		"firstKey":   "first value",
+		"second key": "second value",
+		"third key":  343,
+	}
 	require.Equal(t, expectedKV, KeyVals(err3))
 
 	expectedMsg := fmt.Sprintf("%s: %s: %s: %s", msg3, msg2, msg, "something failed")
@@ -96,4 +101,18 @@ func TestWrapCustomType(t *testing.T) {
 	// test stack
 	expectedStack := err.(stacker).StackTrace()
 	require.Equal(t, expectedStack, err3.(stacker).StackTrace())
+}
+
+func TestUnwrapAll(t *testing.T) {
+	myErr := MyErr("something failed")
+	require.Equal(t, myErr, UnwrapAll(myErr))
+
+	err := Wrap(myErr, "oops")
+	require.Equal(t, myErr, UnwrapAll(err))
+
+	err = fmt.Errorf("wrap: %w", err)
+	require.Equal(t, myErr, UnwrapAll(err))
+
+	err = pkgerrors.Wrap(err, "pkg oops")
+	require.Equal(t, myErr, UnwrapAll(err))
 }
