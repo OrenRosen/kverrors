@@ -1,4 +1,4 @@
-module github.com/OrenRosen/errors
+module github.com/OrenRosen/go/kverrors
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect

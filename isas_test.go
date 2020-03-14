@@ -1,4 +1,4 @@
-package errors
+package kverrors
 
 import (
 	goerrors "errors"

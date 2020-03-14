@@ -1,5 +1,5 @@
 language: go
-go_import_path: github.com/OrenRosen/errors
+go_import_path: github.com/OrenRosen/go/kverrors
 go:
   - 1.13.x
 
