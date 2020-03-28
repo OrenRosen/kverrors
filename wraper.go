@@ -9,15 +9,15 @@ import (
 type wraper struct {
 	wrappedErr error
 	msg        string
-	keyvals    []interface{}
+	keyvals    map[string]interface{}
 	stackTrace errors.StackTrace
 }
 
 // wraper implements error, stacker, keyvaluer and unwrapper
-func (w *wraper) Error() string                 { return w.msg + ": " + w.wrappedErr.Error() }
-func (w *wraper) Unwrap() error                 { return w.wrappedErr }
-func (w *wraper) StackTrace() errors.StackTrace { return w.stackTrace }
-func (w *wraper) KeyVals() []interface{}        { return w.keyvals }
+func (w *wraper) Error() string                   { return w.msg + ": " + w.wrappedErr.Error() }
+func (w *wraper) Unwrap() error                   { return w.wrappedErr }
+func (w *wraper) StackTrace() errors.StackTrace   { return w.stackTrace }
+func (w *wraper) KeyVals() map[string]interface{} { return w.keyvals }
 
 // Wrap returns a new error with added msg and keyvals.
 // the returned error wraps supplied error.
@@ -31,7 +31,7 @@ func Wrap(err error, msg string, keyvals ...interface{}) error {
 	return &wraper{
 		wrappedErr: err,
 		msg:        msg,
-		keyvals:    keyvals,
+		keyvals:    paramsFromKeyvals(keyvals),
 		stackTrace: getOrNewStackTrace(err),
 	}
 }

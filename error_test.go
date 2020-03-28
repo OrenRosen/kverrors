@@ -13,17 +13,17 @@ func TestNew(t *testing.T) {
 		expectedMap map[string]interface{}
 	}{
 		{
-			msg:         "some msg",
+			msg:         "exemaple 1",
 			kv:          []interface{}{"firstKey", "first value"},
 			expectedMap: map[string]interface{}{"firstKey": "first value"},
 		},
 		{
-			msg:         "some msg",
+			msg:         "exemaple 1",
 			kv:          []interface{}{"firstKey", "first value", "secondKey", "second value"},
 			expectedMap: map[string]interface{}{"firstKey": "first value", "secondKey": "second value"},
 		},
 		{
-			msg:         "some msg",
+			msg:         "exemaple 3",
 			kv:          []interface{}{""},
 			expectedMap: map[string]interface{}{},
 		},
@@ -34,8 +34,8 @@ func TestNew(t *testing.T) {
 		require.Equal(t, example.msg, err.Error())
 		kver, ok := err.(keyvaluer)
 		require.True(t, ok)
-		require.Equal(t, example.kv, kver.KeyVals())
-		require.Equal(t, example.expectedMap, KeyVals(err))
+		require.Equal(t, example.expectedMap, kver.KeyVals(), example.msg)
+		require.Equal(t, example.expectedMap, KeyVals(err), example.msg)
 	}
 }
 
