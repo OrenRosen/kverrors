@@ -1,4 +1,4 @@
-// Package kverrors is a wrapper to https://github.com/pkg/errors for support key values. e.g structured errors.
+// Package kverrors is a small wrapper to https://github.com/pkg/errors for supporting key values. e.g structured errors.
 //
 // Adding keyvalues to errors is done by the method
 //	Wrap(err error, msg string, keyvals ...interface{}) error
@@ -17,14 +17,14 @@
 //
 // Unwrapping
 //
-// Every error created with kverrors implements this interface:
+// Every error created with kverrors implements the unwrapper interface:
 //
 //	type unwrapper interface {
 //		Unwrap() error
 //	}
 //
 // For getting the original error, use the package function kverros.Unwrap
-// which will recursively iterate though the error chain and will retrieve
+// which will recursively iterate through the error chain and will retrieve
 // the original error, which is the first error which doesn't implement unwraper
 // (or causer from pkg/erros)
 package kverrors
