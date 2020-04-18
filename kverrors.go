@@ -1,3 +1,32 @@
+// Package kverrors is a wrapper to https://github.com/pkg/errors for support key values. e.g structured errors.
+//
+// Adding keyvalues to errors is done by the method
+//	Wrap(err error, msg string, keyvals ...interface{}) error
+// Where keyvals are a key value pairs. The key must be string.
+//	func DoSomethingWithUser(userID string) error {
+//		user, err := userRepo.FindUser(123)
+//		if err != nil {
+//			return kverrors.Wrap(err, "DoSomethingWithUser",
+//				"userID", 123,
+//				"otherKey", "some value",
+//			)
+//		}
+//
+//		...
+//	}
+//
+// Unwrapping
+//
+// Every error created with kverrors implements this interface:
+//
+//	type unwrapper interface {
+//		Unwrap() error
+//	}
+//
+// For getting the original error, use the package function kverros.Unwrap
+// which will recursively iterate though the error chain and will retrieve
+// the original error, which is the first error which doesn't implement unwraper
+// (or causer from pkg/erros)
 package kverrors
 
 import (
@@ -30,15 +59,17 @@ func New(msg string, keyvals ...interface{}) error {
 	}
 }
 
-// New returns a new error with formatted msg.
+// Errorf returns a new error with formatted message according to a format specifier.
+// keyvals are structured key-value pairs, and usually used for infrastructure frameworks
+// as logs and error reporting. (should not be analysed in the code, as the message isn't).
 // the returned error holds a stacktrace created with pkg/errors
-func Errorf(format string, args ...interface{}) error {
+func Errorf(format string, keyvals ...interface{}) error {
 	if strings.Contains(format, "%w") {
-		err := fmt.Errorf(format, args...)
+		err := fmt.Errorf(format, keyvals...)
 		return Wrap(err, "Errorf")
 	}
 
-	msg := fmt.Sprintf(format, args...)
+	msg := fmt.Sprintf(format, keyvals...)
 	return New(msg)
 }
 
