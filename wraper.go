@@ -13,7 +13,7 @@ type wraper struct {
 	stackTrace errors.StackTrace
 }
 
-// wraper implements error, stacker, keyvaluer and unwrapper
+// wraper implements error, stacker, keyvaluer and unwrapper.
 func (w *wraper) Error() string                   { return w.msg + ": " + w.wrappedErr.Error() }
 func (w *wraper) Unwrap() error                   { return w.wrappedErr }
 func (w *wraper) StackTrace() errors.StackTrace   { return w.stackTrace }
@@ -36,6 +36,8 @@ func Wrap(err error, msg string, keyvals ...interface{}) error {
 	}
 }
 
+// Wrapf wraps an error with a message formatted according to a format specifier.
+// It returns a new error using Wrap.
 func Wrapf(err error, format string, args ...interface{}) error {
 	if err == nil {
 		return nil
