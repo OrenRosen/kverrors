@@ -30,7 +30,7 @@ if err != nil {
 
 The funciton
 ```go
-kverrors.KeyVals(err error) map[string]interface{}
+KeyVals(err error) map[string]interface{}
 ```
 returns the key value pairs across the error chain. 
 the error chain considered to be stopped when the error doesn't unwraps to an inner error.
