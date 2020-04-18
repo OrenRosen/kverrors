@@ -1,7 +1,7 @@
 # errors [![Build Status](https://travis-ci.org/OrenRosen/kverrors.svg?branch=master)](https://travis-ci.org/OrenRosen/kverrors) [![GoDoc](https://godoc.org/github.com/OrenRosen/kverrors?status.svg)](http://godoc.org/github.com/OrenRosen/kverrors)
 
 
-pkg errors is a wrapper to [`pkg/errors`](https://github.com/pkg/errors) for supporting structured errors for logging
+pkg errors is a small wrapper to [`pkg/errors`](https://github.com/pkg/errors) for supporting structured errors for logging
 (`github.com/OrenRosen/errors` is temporary location)
 
 ---
