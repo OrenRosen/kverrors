@@ -35,7 +35,7 @@ func New(msg string, keyvals ...interface{}) error {
 func Errorf(format string, args ...interface{}) error {
 	if strings.Contains(format, "%w") {
 		err := fmt.Errorf(format, args...)
-			return Wrap(err, "Errorf")
+		return Wrap(err, "Errorf")
 	}
 
 	msg := fmt.Sprintf(format, args...)
