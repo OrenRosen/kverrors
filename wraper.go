@@ -30,7 +30,7 @@ func Wrap(err error, msg string, keyvals ...interface{}) error {
 
 	return &wraper{
 		wrappedErr: err,
-		msg:        msg,
+		msg:        "msg",
 		keyvals:    paramsFromKeyvals(keyvals),
 		stackTrace: getOrNewStackTrace(err),
 	}
