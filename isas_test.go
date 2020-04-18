@@ -1,16 +1,17 @@
-package errors
+package kverrors_test
 
 import (
 	goerrors "errors"
 	"fmt"
 	"testing"
 
+	"github.com/OrenRosen/kverrors"
 	"github.com/stretchr/testify/require"
 )
 
 func TestIs(t *testing.T) {
 	origErr := fmt.Errorf("original error")
-	wrapErr := Wrap(origErr, "mm wrapping")
+	wrapErr := kverrors.Wrap(origErr, "mm wrapping")
 	fmtErr := fmt.Errorf("fmt wrapping: %w", wrapErr)
 
 	require.True(t, goerrors.Is(fmtErr, origErr), "wrapping errors failed to be")
@@ -23,7 +24,7 @@ func (e myError) Error() string { return string(e) }
 
 func TestAs(t *testing.T) {
 	myErr := myError("my error")
-	wrapErr := Wrap(myErr, "mm wrapping")
+	wrapErr := kverrors.Wrap(myErr, "mm wrapping")
 	fmtErr := fmt.Errorf("fmt wrapping: %w", wrapErr)
 
 	var myErr2 myError
@@ -33,11 +34,11 @@ func TestAs(t *testing.T) {
 
 func TestUnwrapAllWithFmt(t *testing.T) {
 	myErr := myError("my error")
-	err := Wrap(myErr, "wrapping")
+	err := kverrors.Wrap(myErr, "wrapping")
 	errW := fmt.Errorf("wrapping: %w", err)
-	errW = Wrap(err, "mmwrapping")
+	errW = kverrors.Wrap(err, "mmwrapping")
 
-	origErr := UnwrapAll(errW)
+	origErr := kverrors.UnwrapAll(errW)
 	c, ok := origErr.(myError)
 
 	require.True(t, ok, "failed unwrapping to myError")
