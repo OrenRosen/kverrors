@@ -1,8 +1,9 @@
-package errors
+package kverrors_test
 
 import (
 	"testing"
 
+	"github.com/OrenRosen/kverrors"
 	"github.com/stretchr/testify/require"
 )
 
@@ -30,12 +31,12 @@ func TestNew(t *testing.T) {
 	}
 
 	for _, example := range examples {
-		err := New(example.msg, example.kv...)
+		err := kverrors.New(example.msg, example.kv...)
 		require.Equal(t, example.msg, err.Error())
 		kver, ok := err.(keyvaluer)
 		require.True(t, ok)
 		require.Equal(t, example.expectedMap, kver.KeyVals(), example.msg)
-		require.Equal(t, example.expectedMap, KeyVals(err), example.msg)
+		require.Equal(t, example.expectedMap, kverrors.KeyVals(err), example.msg)
 	}
 }
 
@@ -58,7 +59,11 @@ func TestErrorf(t *testing.T) {
 	}
 
 	for _, example := range examples {
-		err := Errorf(example.msg, example.format...)
+		err := kverrors.Errorf(example.msg, example.format...)
 		require.Equal(t, example.expected, err.Error())
 	}
+}
+
+type keyvaluer interface {
+	KeyVals() map[string]interface{}
 }
