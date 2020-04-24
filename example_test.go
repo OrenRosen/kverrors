@@ -19,7 +19,7 @@ func ExampleWrap() {
 
 	fmt.Println(kverrors.KeyVals(err))
 
-	// Output: map[count:2 field2:value2 id:some_id]
+	// Output: [field2 value2 id some_id count 2]
 }
 
 func ExampleWrap_2() {
@@ -39,7 +39,7 @@ func ExampleWrap_2() {
 	fmt.Println(kverrors.KeyVals(err))
 
 	// Output: oops3: wrappy2: oops2: wrappy: oops
-	// map[key:value key2:value2]
+	// [key2 value2 key value]
 }
 
 func ExampleWrapf() {

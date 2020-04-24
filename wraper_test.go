@@ -13,39 +13,56 @@ import (
 func TestWrap(t *testing.T) {
 	examples := []struct {
 		err           error
-		msg           string
-		kv            []interface{}
+		secondMsg     string
+		secondKV      []interface{}
 		expectedError string
 		expectedKV    map[string]interface{}
+		desc          string
 	}{
 		{
 			err:           kverrors.New("some msg", "firstKey", "first value"),
-			msg:           "other msg",
-			kv:            []interface{}{"second key", "second value"},
+			secondMsg:     "other msg",
+			secondKV:      []interface{}{"second key", "second value"},
 			expectedError: "other msg: some msg",
 			expectedKV:    map[string]interface{}{"firstKey": "first value", "second key": "second value"},
 		},
 		{
 			err:           io.EOF,
-			msg:           "other msg",
-			kv:            []interface{}{"second key", "second value"},
+			secondMsg:     "other msg",
+			secondKV:      []interface{}{"second key", "second value"},
 			expectedError: "other msg: EOF",
 			expectedKV:    map[string]interface{}{"second key": "second value"},
 		},
 		{
 			err:           kverrors.Wrap(io.EOF, "other msg", "other key", "other value"),
-			msg:           "another msg",
-			kv:            []interface{}{"second key", "second value"},
+			secondMsg:     "another msg",
+			secondKV:      []interface{}{"second key", "second value"},
 			expectedError: "another msg: other msg: EOF",
 			expectedKV:    map[string]interface{}{"other key": "other value", "second key": "second value"},
 		},
+		{
+			desc:          "odd number of keyvals",
+			err:           kverrors.Wrap(io.EOF, "other msg", "key1", "val1"),
+			secondMsg:     "another msg",
+			secondKV:      []interface{}{"value with no key", "key2", "val2"},
+			expectedError: "another msg: other msg: EOF",
+			expectedKV:    map[string]interface{}{"key1": "val1", "key2": "val2", "missingKey": "value with no key"},
+		},
+		{
+			desc:          "nil keyvals",
+			err:           kverrors.Wrap(io.EOF, "other msg", "key1", "val1", "key2", "val2"),
+			secondMsg:     "another msg",
+			secondKV:      nil,
+			expectedError: "another msg: other msg: EOF",
+			expectedKV:    map[string]interface{}{"key1": "val1", "key2": "val2"},
+		},
 	}
 
-	for _, example := range examples {
-		err := kverrors.Wrap(example.err, example.msg, example.kv...)
+	for _, e := range examples {
+		err := kverrors.Wrap(e.err, e.secondMsg, e.secondKV...)
 		require.NotNil(t, err)
-		require.Equal(t, example.expectedError, err.Error())
-		require.Equal(t, example.expectedKV, kverrors.KeyVals(err))
+		require.Equal(t, e.expectedError, err.Error(), e.desc)
+		require.Equal(t, e.expectedKV, kverrors.KeyValsMap(err), e.desc)
 	}
 }
 
@@ -62,10 +79,12 @@ func TestWrapFmt(t *testing.T) {
 	err = fmt.Errorf("fmt3: %w", err)
 	require.Equal(t, "fmt3: oops2: fmt2: fmt1: oops", err.Error())
 
-	expectedKV := map[string]interface{}{
+	expectedKV := []interface{}{"k2", "v2", "k1", "v1"}
+	expectedKVMap := map[string]interface{}{
 		"k1": "v1",
 		"k2": "v2",
 	}
+	require.Equal(t, expectedKVMap, kverrors.KeyValsMap(err))
 	require.Equal(t, expectedKV, kverrors.KeyVals(err))
 }
 
@@ -94,7 +113,7 @@ func TestWrapCustomType(t *testing.T) {
 		"second key": "second value",
 		"third key":  343,
 	}
-	require.Equal(t, expectedKV, kverrors.KeyVals(err3))
+	require.Equal(t, expectedKV, kverrors.KeyValsMap(err3))
 
 	expectedMsg := fmt.Sprintf("%s: %s: %s: %s", msg3, msg2, msg, "something failed")
 	require.Equal(t, expectedMsg, err3.Error())
