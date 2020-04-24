@@ -72,6 +72,9 @@ func Errorf(format string, keyvals ...interface{}) error {
 	return New(msg)
 }
 
+// KeyVals returns all the aggregated keyvals across the error chain
+// the error chain considered to be stopped when the error doesn't
+// unwraps to an inner error.
 func KeyVals(err error) []interface{} {
 	var keyvals []interface{}
 	for err != nil {
@@ -93,7 +96,7 @@ func KeyVals(err error) []interface{} {
 	return keyvals
 }
 
-// KeyValsMap returns the key value pairs across the error chain
+// KeyValsMap returns the key value pairs across the error chain as a map
 // the error chain considered to be stopped when the error doesn't
 // unwraps to an inner error.
 func KeyValsMap(err error) map[string]interface{} {

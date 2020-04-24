@@ -9,8 +9,8 @@ From [go-kit/log](https://github.com/go-kit/kit/tree/master/log)
 > Structured logging is, basically, conceding to the reality that logs are data, and warrant some level of schematic rigor. Using a stricter, key/value-oriented message format for our logs, containing contextual and semantic information, makes it much easier to get insight into the operational activity of the systems we build  
 In short, A structured log message is not only a simple plain text message for a human to read, but a collection of key-values attributes which can be processed and analysed.
 
-Treating errors as structured as well may give us better insight about our errors.
-This package is an experiment for using structured errors for logging as well.
+Errors most common method is logging, and treating errors as structured as well may give us better insight about our errors.
+This package is an experiment for using structured errors for logging.
 
 ## Wrapping an error:
 Wrapping an error is done using `Wrap` function:
@@ -28,19 +28,31 @@ if err != nil {
 
 ## KeyVals  
 
-The funciton
-```go
-KeyVals(err error) map[string]interface{}
-```
-returns the key value pairs across the error chain. 
+The function `KeyVals` returns the aggregated keyvals across the error chain. 
 the error chain considered to be stopped when the error doesn't unwraps to an inner error.
+
+```go
+KeyVals(err error) []interface{}
+```
+
+The function `KeyValsMap` returns the keyvals as map of key-value pairs across the error chain.
+This function have some constraints:
+- If the keyvals length across the error chain isn't even, it adds a `"missing"` key.
+- If a key isn't a string, it ignores it and put a placeholder.
+
+```go
+KeyValsMap(err error) map[string]interface{}
+````
+
 
 ## Stack Trace
 
 `kverrors` depends on `pkg/errors` for generating the stack trace.
-For getting the stack trace, the error returned from `Wrap` implements
+All errors returned with pkg `kverrors` implements the `stacker` interfface{}
 ```go
-StackTrace() []pkgerrors.StackTrace
+type stacker interface {
+    StackTrace() []pkgerrors.StackTrace
+}
 ``` 
 
 ## Unwrapping an error
