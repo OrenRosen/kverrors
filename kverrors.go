@@ -38,14 +38,14 @@ import (
 
 type inner struct {
 	msg        string
-	keyvals    map[string]interface{}
+	keyvals    []interface{}
 	stackTrace pkgerrors.StackTrace
 }
 
 // inner implements error, stacker and keyvaluer
 func (e inner) Error() string                    { return e.msg }
 func (e inner) StackTrace() pkgerrors.StackTrace { return e.stackTrace }
-func (e inner) KeyVals() map[string]interface{}  { return e.keyvals }
+func (e inner) KeyVals() []interface{}           { return e.keyvals }
 
 // New returns a new error with the provided msg and keyvals.
 // keyvals are structured key-value pairs, and usually used for infrastructure frameworks
@@ -54,7 +54,7 @@ func (e inner) KeyVals() map[string]interface{}  { return e.keyvals }
 func New(msg string, keyvals ...interface{}) error {
 	return &inner{
 		msg:        msg,
-		keyvals:    paramsFromKeyvals(keyvals),
+		keyvals:    keyvals,
 		stackTrace: newStackTrace(1),
 	}
 }
@@ -65,35 +65,43 @@ func New(msg string, keyvals ...interface{}) error {
 // the returned error holds a stacktrace created with pkg/errors
 func Errorf(format string, keyvals ...interface{}) error {
 	if strings.Contains(format, "%w") {
-		err := fmt.Errorf(format, keyvals...)
-		return Wrap(err, "Errorf")
+		return fmt.Errorf(format, keyvals...)
 	}
 
 	msg := fmt.Sprintf(format, keyvals...)
 	return New(msg)
 }
 
-// KeyVals returns the key value pairs across the error chain
+// KeyVals returns all the aggregated keyvals across the error chain
 // the error chain considered to be stopped when the error doesn't
 // unwraps to an inner error.
-func KeyVals(err error) map[string]interface{} {
-	keyvals := map[string]interface{}{}
+func KeyVals(err error) []interface{} {
+	var keyvals []interface{}
 	for err != nil {
 		if kver, ok := err.(keyvaluer); ok {
-			for k, v := range kver.KeyVals() {
-				keyvals[k] = v
-			}
+			keyvals = append(keyvals, kver.KeyVals()...)
 		}
 
 		if unw, ok := err.(unwrapper); ok {
 			err = unw.Unwrap()
-			continue
+		} else {
+			err = nil
 		}
+	}
 
-		err = nil
+	if keyvals == nil {
+		keyvals = []interface{}{}
 	}
 
 	return keyvals
+}
+
+// KeyValsMap returns the key value pairs across the error chain as a map
+// the error chain considered to be stopped when the error doesn't
+// unwraps to an inner error.
+func KeyValsMap(err error) map[string]interface{} {
+	keyvals := KeyVals(err)
+	return paramsFromKeyvals(keyvals)
 }
 
 // private
@@ -107,7 +115,7 @@ type stacker interface {
 }
 
 type keyvaluer interface {
-	KeyVals() map[string]interface{}
+	KeyVals() []interface{}
 }
 
 func newStackTrace(skip int) pkgerrors.StackTrace {
@@ -134,6 +142,20 @@ func stackTraceFrom(err error) pkgerrors.StackTrace {
 }
 
 func paramsFromKeyvals(keyvals []interface{}) map[string]interface{} {
+	if keyvals == nil {
+		return map[string]interface{}{}
+	}
+
+	if len(keyvals)%2 != 0 {
+		temp := make([]interface{}, len(keyvals)+1)
+		temp[0] = "missingKey"
+		for i, kv := range keyvals {
+			temp[i+1] = kv
+		}
+
+		keyvals = temp
+	}
+
 	extra := make(map[string]interface{}, len(keyvals)/2)
 
 	for i, key := range keyvals {
@@ -147,17 +169,17 @@ func paramsFromKeyvals(keyvals []interface{}) map[string]interface{} {
 		}
 
 		value := val(keyvals[valIndex])
-		keyStr := keyStr(key)
+		keyStr := keyToString(key)
 		extra[keyStr] = value
 	}
 
 	return extra
 }
 
-func keyStr(key interface{}) string {
+func keyToString(key interface{}) string {
 	keyStr, ok := key.(string)
 	if !ok {
-		keyStr = fmt.Sprintf("%v", key)
+		keyStr = "keyIsNotAStringError"
 	}
 
 	return keyStr
