@@ -1,4 +1,4 @@
-# kverrors [![Build Status](https://travis-ci.org/OrenRosen/kverrors.svg?branch=master)](https://travis-ci.org/OrenRosen/kverrors) [![GoDoc](https://godoc.org/github.com/OrenRosen/kverrors?status.svg)](http://godoc.org/github.com/OrenRosen/kverrors)
+# kverrors [![Build Status](https://travis-ci.org/OrenRosen/kverrors.svg?branch=master)](https://travis-ci.org/OrenRosen/kverrors) [![GoDoc](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/OrenRosen/kverrors)
 
 
 pkg `kverrors` is a small wrapper to [`pkg/errors`](https://github.com/pkg/errors) for supporting structured errors for logging.
