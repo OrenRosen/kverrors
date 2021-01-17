@@ -1,38 +1,72 @@
-# Description
+# Type of change
+
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
+- [ ] Refactor
+- [ ] Remove unused code
+- [ ] Test
+
+# Description, Motivation and Context
 
 Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.
 
-Fixes # (issue)
+# Link to resources
 
-## Type of change
+- [Jira Ticket]()
+- [Documentation]()
 
-Please delete options that are not relevant.
+# Screenshots (if appropriate):
 
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] This change requires a documentation update
+# Testing
 
-# How Has This Been Tested?
+- [ ] This code wasn't tested
+  - ( Please explain why) 
+- [ ] This code was tested
+  - (Please explain how)
+- [ ] An additional manual test should run before merge+deploy.
+- [ ] An additional manual test should run after merge+deploy. 
 
-Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce. Please also list any relevant details for your test configuration
+### Bug fix
+- [ ] A unit test was added for proving my fix is effective.
+- [ ] An automation test was added for proving my fix is effective.
 
-- [ ] Test A
-- [ ] Test B
+### New feature
+- [ ] A unit test was added for checking new logic.
+- [ ] An automation test was added for checking new logic.
 
-**Test Configuration**:
-* Firmware version:
-* Hardware:
-* Toolchain:
-* SDK:
+### Refactor
+- [ ] The refactor is covered fully in unit-test / automation-tests.
+
+### Breaking change
+- [ ] New tests were added for checking new logic
+- [ ] Should keep the test for deprecated logic until it will be removed.
+
+# Removing unused code
+
+Please explain how you've made sure the removed code isn't used.
+
+# Monitoring
+
+- [ ] The code introduce new warning/error reporting outside of a normal failed request.
+  - (Please explain which)
+  - [ ] I've made sure the code won't have duplicate error logs.
+- [ ] The code will impact system performance
+  - [ ] Negative: 
+  - [ ] Positive:
+  
+# dependancies?
+- [ ] The code introduce new external dependencies
+  - (Please explain which) 
+
+# Is the code introduce new warning/error reporting
+
+Meaning reports that doesn't go by the normal flow of a failed request. 
 
 # Checklist:
 
-- [ ] My code follows the style guidelines of this project
 - [ ] I have performed a self-review of my own code
-- [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] I have made corresponding changes to the documentation
-- [ ] My changes generate no new warnings
 - [ ] I have added tests that prove my fix is effective or that my feature works
 - [ ] New and existing unit tests pass locally with my changes
 - [ ] Any dependent changes have been merged and published in downstream modules
