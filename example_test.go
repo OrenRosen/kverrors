@@ -22,6 +22,9 @@ func ExampleWrap() {
 	// Output: [field2 value2 id some_id count 2]
 }
 
+
+// comment
+
 func ExampleWrap_2() {
 	err := fmt.Errorf("oops")
 	err = kverrors.Wrap(err, "wrappy",
