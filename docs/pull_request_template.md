@@ -14,7 +14,11 @@
 
 - [Jira Ticket]() / [Documentation]() / [Zeplin]()
 
-# How this branch was/will be tested?
+# Affected Services/Components
+
+(Please describe if your change affects other parts in the system)
+
+# How was this branch tested?
 
 
 # Have you added new dependencies?
